@@ -137,6 +137,57 @@ class DetailDataBaseManager():
         total = cls.c.fetchall()
         pprint(total)    
 
+    @classmethod
+    def total_cars_sold(cls):
+        print("\nTotal sold cars from each brand:")
+        cls.c.execute("""select count(*) as Total_sold_cars, manufacturer.name from car
+                inner join manufacturer on car.manufacturer_id = manufacturer.id
+                where car.sold = 'yes'
+                group by manufacturer.name
+                """)
+        column_names = [description[0] for description in cls.c.description]
+        print(" | ".join(column_names))
+        total_sold = cls.c.fetchall()
+        pprint(total_sold)
+
+    @classmethod
+    def sale_avg(cls):
+        print("\nSale average for each country:")
+        cls.c.execute("""select avg(sale_price) as Sale_avg, m.country from car
+                inner join manufacturer m on m.id = manufacturer_id
+                inner join sale s on car.id = s.car_id
+                where car.sold = 'yes'
+                group by m.country
+                """)
+        column_names = [description[0] for description in cls.c.description]
+        print(" | ".join(column_names))
+        sale_avg = cls.c.fetchall()
+        pprint(sale_avg)  
+
+    @classmethod
+    def new_cars(cls):
+        print("\nShow new cars (not used cars):")
+        cls.c.execute("""select car.description, m.name from car
+                inner join manufacturer m on m.id = manufacturer_id
+                where car.mileage = 0.0
+                """)
+        column_names = [description[0] for description in cls.c.description]
+        print(" | ".join(column_names))
+        new_cars = cls.c.fetchall()
+        pprint(new_cars)
+
+    @classmethod
+    def price_avg_by_brand(cls, brand_name):
+        print(f"\n Average price of cars of {brand_name} brand:")
+        cls.c.execute("""select avg(sale_price) as price_avg from car
+                inner join manufacturer m on m.id = manufacturer_id
+                inner join sale s on car.id = s.car_id
+                where m.name = :brand
+                """, {'brand': brand_name})
+        column_names = [description[0] for description in cls.c.description]
+        print(" | ".join(column_names))
+        sale_avg = cls.c.fetchall()
+        pprint(sale_avg)    
 '''
 DetailDataBaseManager.add_customer("jess","re@gmail.com","2343 54")
 DetailDataBaseManager.add_customer("abdo","ab@gmail.com","23 34 1232")
@@ -188,3 +239,7 @@ DetailDataBaseManager.show_sellers_total()
 
 DetailDataBaseManager.manufacturer_total_cars()
 DetailDataBaseManager.country_total_cars()
+DetailDataBaseManager.total_cars_sold()
+DetailDataBaseManager.sale_avg()
+DetailDataBaseManager.new_cars()
+DetailDataBaseManager.price_avg_by_brand("bmw")
